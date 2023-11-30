@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#try the ping command to see what is going on!
+#try the ping command to see what is going on
 
 if [ -z "$1" ]
 then
