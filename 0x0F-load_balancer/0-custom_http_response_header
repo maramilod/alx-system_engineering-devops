@@ -25,7 +25,7 @@ config="server {
 
     index index.html;
 
-    server_name 485409-web-01;
+    server_name proto-byte.tech;
 
     error_page 404 /error_404.html;
 
