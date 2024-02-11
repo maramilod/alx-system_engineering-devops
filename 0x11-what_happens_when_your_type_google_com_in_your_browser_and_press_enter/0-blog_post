@@ -1,0 +1,60 @@
+# **What happens when you type google.com in your browser and press Enter?**
+
+### **what happen when i  search for https://[www.google.com](http://www.google.com) ?**
+
+# Let's explore how a URL or link functions and understand the different components involved:
+
+1. HTTPS: The "https" in the URL stands for Secure Hypertext Transfer Protocol. It ensures a secure and encrypted connection between the browser and the web server, safeguarding the data transmitted.
+2. WWW: The "www" is a subdomain of the main domain "google.com." It serves as an address for the website and helps identify the specific server hosting the website. The browser retrieves the IP address associated with this subdomain to establish a connection.
+
+## Now, let's delve into the process of obtaining the IP address:
+
+When a user clicks on a URL, the browser checks if the domain name exists. If it's the first time visiting the web server, the browser won't have the IP address readily available. In this case, the browser consults the operating system (OS) to see if it has the IP address stored. If not, the OS can reach out to a resolver.
+
+A resolver is responsible for fetching the IP address for the browser. The resolver initiates a journey to obtain the IP address. It starts by contacting the root server, which represents the top-level domain (TLD) such as ".com," ".net," or ".gov." The root server provides the resolver with directions, typically pointing to the appropriate TLD server, in this case, ".com."
+
+The TLD server further guides the resolver to the IP servers that hold the IP addresses for the domain name. There are multiple IP servers for a domain name to ensure redundancy and fault tolerance. In the event that one server fails, the others can handle the requests seamlessly. Finally, the resolver obtains the IP address from one of these authoritative IP servers.
+
+OK now we have the IP what is the next step ?
+
+# TCP/IP Connection
+
+Once the DNS resolver obtains the IP address of the domain, the next step involves establishing a connection between the client (browser) and the server using a process called the TCP 3-way handshake
+
+1. SYN (Synchronize): The client initiates the handshake by sending a SYN packet to the server. This packet includes a randomly generated initial sequence number (ISN) chosen by the client.
+2. SYN/ACK (Synchronize/Acknowledge): Upon receiving the SYN packet, the server acknowledges the request by sending a SYN/ACK packet back to the client. The server also selects its own ISN and includes it in the SYN/ACK packet.
+3. ACK (Acknowledge): Finally, the client responds to the server's SYN/ACK packet by sending an ACK packet. The client increments its ISN and includes it in the ACK packet. This packet confirms that the client has received the server's acknowledgment.
+
+At this point, the handshake is complete, and a reliable connection is established between the client and the server. The client and server can now exchange data packets with synchronized sequence numbers, ensuring the reliable and orderly transmission of data. 
+
+Once the TCP 3-way handshake is complete and the client and server have established a connection, it's important to ensure the confidentiality and integrity of the data being transmitted. This is where HTTPS (HyperText Transfer Protocol Secure) comes into play.
+
+# HTTPS / SSL
+
+HTTPS is a secure version of the HTTP protocol, which is used for communication between the client (browser) and the server. It incorporates an additional layer of security provided by SSL (Secure Sockets Layer) or its successor, TLS (Transport Layer Security). SSL/TLS encrypts and decrypts the data exchanged between the client and server, making it difficult for any third party to intercept and understand the content of the communication.
+
+ 
+
+After the establishment of a secure connection between the client's browser and Google's website server, it is essential to ensure that the website can handle a large number of user requests efficiently. This is where a load balancer comes into play.
+
+# Load balancer
+
+load balancer is employed to evenly distribute these requests across multiple servers. The purpose of load balancing is to prevent any single server from becoming overwhelmed with traffic, which could lead to  Single Point of Failure (**SPOF**)  or  downtime .
+
+# The Great Wall
+
+The Great Wall, also known as a firewall, serves the purpose of analyzing incoming traffic based on predefined rules and filtering out potentially harmful or suspicious traffic. Its primary objective is to prevent attacks on the network. When a user's request reaches the firewall, it undergoes analysis, and if it is determined to be non-malicious or suspicious, it is allowed to connect to a web server allocated by the load balance
+
+# Web server & Application server
+
+A web server is a combination of software and hardware that is specifically designed to handle HTTP/HTTPS requests and serve static content such as simple HTML pages, plain text files, or images. It acts as the intermediary between the client's browser and the requested content.
+
+On the other hand, an application server operates behind the web server and in front of a Database Management System (DBMS). Its primary function is to generate dynamic content that supports the development and delivery of an application. The application server is responsible for executing the business logic and processing user requests, interacting with the database, and delivering the appropriate response to the client.
+
+While the web server focuses on serving static content, the application server specializes in handling dynamic content and providing the necessary infrastructure for application development and delivery. Together, they form a crucial part of the architecture required to deliver web-based applications.
+
+# Database Management System (DBMS)
+
+is a software program that allows users to interact with a database. A database is an organized collection of structured information or data stored in a computer system
+
+## And that’s what happens when you type `https://www.google.com` in your browser and press `Enter`.
