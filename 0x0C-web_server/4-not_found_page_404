@@ -1,45 +1,39 @@
 #!/usr/bin/env bash
-# Install and configure nginx web server
+# Configures a new ubuntu machine by installing
+# Nginx where it should be listening on port 80
+# Serve a page that would return a Hello World string
+#
 
-# Update the package lists for upgrades and new package installations
-sudo apt-get update
+echo -e "Updating and installing Nginx.\n"
+sudo apt-get update -y -qq && \
+	 sudo apt-get install nginx -y
 
-# Install nginx
-sudo apt-get install -y nginx
+echo -e "\nSetting up some minor stuff.\n"
 
-# Write "Hello World!" to the index.html file
-echo "Hello World!" | sudo tee /var/www/html/index.html > /dev/null
+# starting nginx service
+sudo service nginx start
 
-# Write "Ceci n'est pas une page" to the error_404.html file
-echo "Ceci n'est pas une page" | sudo tee /var/www/html/error_404.html > /dev/null
+# allowing nginx on firewall
+sudo ufw allow 'Nginx HTTP'
 
-# Define the Nginx configuration
-CONFIG="
-server {
-        listen 80 default_server;
-        listen [::]:80 default_server;
+# Give the user ownership to website files for easy editing
+sudo chown -R "$USER":"$USER" /var/www/html
+sudo chmod -R 755 /var/www
 
-        root /var/www/html;
+# Backup default index
+cp /var/www/html/index.nginx-debian.html /var/www/html/index.nginx-debian.html.bckp
 
-        index index.html index.htm index.nginx-debian.html;
+# Creating new index
+echo -e "Hello World!" > /var/www/html/index.nginx-debian.html
 
-        server_name ajwadg.tech;
+# Setting up /redirect_me to a youtube video
+sudo sed -i '24i\	rewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;' /etc/nginx/sites-available/default
 
-        error_page 404 /error_404.html;
+# Set up a 404 page
+echo "Ceci n'est pas une page" >> /var/www/html/error_404.html
+sudo sed -i '25i\	error_page 404 /error_404.html;' /etc/nginx/sites-available/default
 
-        location = /error_404.html {
-                root /var/www/html;
-                internal;
-        }
-
-        location /redirect_me {
-                return 301 https://www.nginx.com/blog/creating-nginx-rewrite-rules/;
-        }
-}"
-
-# Write the Nginx configuration to the default site configuration file
-echo "$CONFIG" | sudo tee /etc/nginx/sites-available/default
-
-# Restart the nginx service
+# Restarting nginx
 sudo service nginx restart
 
+echo -e "\nCompleted.\n"
