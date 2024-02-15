@@ -1,46 +1,84 @@
 #!/usr/bin/env bash
-# Update the system packages
-sudo apt-get -y update
+# duplicate web-01 to web-02
+# these scripts are an upgrade from the web-server scripts...
 
-# Install Nginx
-sudo apt-get -y install nginx
+# uncomment to see the script run in action
+#set -x
 
-# Get the hostname of the current server
-name=$(hostname)
+echo -e "Updating and doing some minor checks...\n"
 
-# Create a simple HTML page
-echo "<h1>Welcome to $name</h1>" > /var/www/html/index.html
+function install() {
+	command -v "$1" &> /dev/null
 
-# Create a simple error page
-echo "<h1>Error 404 - Page Not Found</h1>" > /var/www/html/error_404.html
+	#shellcheck disable=SC2181
+	if [ $? -ne 0 ]; then
+		echo -e "	Installing: $1$\n"
+		sudo apt-get update -y -qq && \
+			sudo apt-get install -y "$1" -qq
+		echo -e "\n"
+	else
+		echo -e "	${1} is already installed.\n"
+	fi
+}
 
-# Define the Nginx configuration
-config="server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
+install nginx #install nginx
 
-    add_header X-Served-By $name always;
+echo -e "\nSetting up some minor stuff.\n"
 
-    root /var/www/html;
+# allowing nginx on firewall
+sudo ufw allow 'Nginx HTTP'
 
-    index index.html;
+# Give the user ownership to website files for easy editing
+if [ -d "/var/www" ]; then
+	sudo chown -R "$USER":"$USER" /var/www
+	sudo chmod -R 755 /var/www
+else
+	sudo mkdir -p /var/www
+	sudo chown -R "$USER":"$USER" /var/www
+	sudo chmod -R 755 /var/www
+fi
 
-    server_name proto-byte.tech;
+# create directories if not present
+for dir in /var/www/{html,error}; do
+	if ! [ -d "$dir" ]; then
+		mkdir -p "$dir"
+	fi
+done
 
-    error_page 404 /error_404.html;
+# creating new index
+echo "Hello World!" > /var/www/html/index.html
 
-    location = /error_404.html {
-        root /var/www/html;
-        internal;
-    }
+# create new error page
+echo "Ceci n'est pas une page" > /var/www/html/error_404.html
 
-    location /redirect_me {
-        return 301 https://www.nginx.com/blog/creating-nginx-rewrite-rules/;
-    }
+# backup default server config file
+sudo cp /etc/nginx/sites-enabled/default nginx-sites-enabled_default.backup
+
+server_config=\
+"server {
+		listen 80 default_server;
+		listen [::]:80 default_server;
+		root /var/www/html;
+		index index.html index.htm index.nginx-debian.html
+		server_name_;
+		add_header X-Served-By \$hostname;
+		location / {
+			try_files \$uri \$uri/ =404;
+		}
+		if (\$request_filename ~ redirect_me){
+			rewrite ^ https://th3-gr00t.tk/ permanent;
+		}
+		error_page 404 /error_404.html;
+		location = /error_404.html {
+			internal;
+		}
 }"
 
-# Write the configuration to the Nginx sites-available directory
-echo "$config" | sudo tee /etc/nginx/sites-available/default
+#shellcheck disable=SC2154
+echo "$server_config" | sudo dd status=none of=/etc/nginx/sites-enabled/default
 
-# Restart Nginx to apply the changes
-sudo service nginx restart
+if [ "$(pgrep -c nginx)" -le 0 ]; then
+	sudo service nginx start
+else
+	sudo service nginx restart
+fi
