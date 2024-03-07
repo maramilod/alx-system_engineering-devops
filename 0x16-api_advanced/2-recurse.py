@@ -6,7 +6,7 @@ import requests
 def recurse(subreddit, hot_list=[], next_page=None, count=0):
     user_agent = '0x16-api_advanced-jmajetich'
     url = 'https://www.reddit.com/r/{}/hot.json'.format(subreddit)
-    
+
     if next_page:
         url += '?after={}'.format(next_page)
     headers = {'User-Agent': ""}
@@ -24,4 +24,3 @@ def recurse(subreddit, hot_list=[], next_page=None, count=0):
         return recurse(subreddit, hot_list, next_page, count)
     else:
         return hot_list
-
